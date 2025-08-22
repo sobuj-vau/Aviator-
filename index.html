@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviator - Telegram Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #3949ab 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(25, 30, 80, 0.85);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        header {
+            background: rgba(18, 22, 65, 0.95);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 28px;
+            color: #5c6bc0;
+        }
+        
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #7986cb, #9fa8da);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #5c6bc0, #3949ab);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border: 2px solid #9fa8da;
+        }
+        
+        .balance-container {
+            padding: 20px;
+            background: rgba(30, 36, 100, 0.8);
+            margin: 15px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .balance-title {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+        
+        .balance-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffcc80;
+            text-shadow: 0 0 10px rgba(255, 204, 128, 0.4);
+        }
+        
+        .game-area {
+            position: relative;
+            height: 300px;
+            background: linear-gradient(180deg, #1c233f 0%, #161a2f 100%);
+            margin: 15px;
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sky {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+        
+        .cloud:nth-child(1) { top: 20%; left: 10%; width: 60px; height: 30px; }
+        .cloud:nth-child(2) { top: 40%; right: 15%; width: 80px; height: 35px; }
+        .cloud:nth-child(3) { top: 65%; left: 20%; width: 50px; height: 25px; }
+        
+        .multiplier-display {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 204, 128, 0.8);
+            z-index: 11;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .airplane {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 36px;
+            z-index: 10;
+            transition: bottom 6s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+        
+        .multiplier-line {
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .history {
+            display: flex;
+            gap: 8px;
+            padding: 15px;
+            justify-content: center;
+            background: rgba(18, 22, 65, 0.6);
+            margin: 15px;
+            border-radius: 15px;
+        }
+        
+        .history-item {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .history-win {
+            background: linear-gradient(45deg, #66bb6a, #43a047);
+        }
+        
+        .history-loss {
+            background: linear-gradient(45deg, #ef5350, #e53935);
+        }
+        
+        .betting-panel {
+            background: rgba(30, 36, 100, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .bet-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .bet-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bet-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #5c6bc0;
+            border-radius: 10px;
+            padding: 12px;
+            color: #ffffff;
+            width: 120px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .bet-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #5c6bc0, #3949ab);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #66bb6a, #43a047);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #ef5350, #e53935);
+            color: white;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .players-container {
+            margin: 15px;
+        }
+        
+        .players-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .online-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #66bb6a;
+        }
+        
+        .players-list {
+            background: rgba(30, 36, 100, 0.8);
+            border-radius: 15px;
+            padding: 15px;
+            max-height: 250px;
+            overflow-y: auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .player-item:last-child {
+            border-bottom: none;
+        }
+        
+        .player-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .player-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #5c6bc0, #3949ab);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            border: 1px solid #9fa8da;
+        }
+        
+        .player-bet {
+            color: #ffcc80;
+            font-weight: bold;
+        }
+        
+        .player-multiplier {
+            color: #66bb6a;
+            font-weight: bold;
+        }
+        
+        .crashed {
+            color: #ef5350;
+        }
+        
+        .cashed-out {
+            animation: flash 0.5s;
+        }
+        
+        @keyframes flash {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #5c6bc0;
+            border-radius: 10px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 500px) {
+            .bet-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .game-area {
+                height: 250px;
+            }
+            
+            .balance-amount {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-plane"></i></div>
+                <div class="logo-text">Aviator</div>
+            </div>
+            <div class="user-info">
+                <div class="avatar">U</div>
+                <div>User123</div>
+            </div>
+        </header>
+        
+        <div class="balance-container">
+            <div class="balance-title">Your Balance</div>
+            <div class="balance-amount">1,000.00 ₿</div>
+        </div>
+        
+        <div class="game-area">
+            <div class="sky">
+                <div class="cloud"></div>
+                <div class="cloud"></div>
+                <div class="cloud"></div>
+            </div>
+            <div class="multiplier-line" style="top: 50%"></div>
+            <div class="multiplier-line" style="top: 25%"></div>
+            <div class="multiplier-line" style="top: 75%"></div>
+            <div class="multiplier-display">1.00x</div>
+            <div class="airplane">✈️</div>
+        </div>
+        
+        <div class="history">
+            <div class="history-item history-win">2.5x</div>
+            <div class="history-item history-loss">0.0x</div>
+            <div class="history-item history-win">1.8x</div>
+            <div class="history-item history-win">3.2x</div>
+            <div class="history-item history-loss">0.0x</div>
+            <div class="history-item history-win">4.1x</div>
+            <div class="history-item history-win">1.3x</div>
+        </div>
+        
+        <div class="betting-panel">
+            <div class="bet-controls">
+                <div class="bet-amount">
+                    <span>Bet Amount:</span>
+                    <input type="number" class="bet-input" value="100" min="10" max="1000" step="10">
+                </div>
+                <div class="bet-buttons">
+                    <button class="btn btn-primary" onclick="adjustBet(2)">2x</button>
+                    <button class="btn btn-primary" onclick="adjustBet(0.5)">½</button>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-success" onclick="placeBet()">
+                    <i class="fas fa-plus-circle"></i> Place Bet
+                </button>
+                <button class="btn btn-danger" onclick="cashOut()" disabled>
+                    <i class="fas fa-money-bill-wave"></i> Cash Out
+                </button>
+            </div>
+        </div>
+        
+        <div class="players-container">
+            <div class="players-header">
+                <h3>Live Players</h3>
+                <div class="online-indicator">
+                    <div class="online-dot"></div>
+                    <span>24 Online</span>
+                </div>
+            </div>
+            <div class="players-list">
+                <div class="player-item">
+                    <div class="player-name">
+                        <div class="player-avatar">A</div>
+                        <span>Alex</span>
+                    </div>
+                    <div class="player-info">
+                        <span class="player-bet">100 ₿</span> • 
+                        <span class="player-multiplier">1.85x</span>
+                    </div>
+                </div>
+                <div class="player-item">
+                    <div class="player-name">
+                        <div class="player-avatar">M</div>
+                        <span>Maria</span>
+                    </div>
+                    <div class="player-info">
+                        <span class="player-bet">200 ₿</span> • 
+                        <span class="player-multiplier">Cashed out</span>
+                    </div>
+                </div>
+                <div class="player-item">
+                    <div class="player-name">
+                        <div class="player-avatar">T</div>
+                        <span>Telegram User</span>
+                    </div>
+                    <div class="player-info">
+                        <span class="player-bet">50 ₿</span> • 
+                        <span class="player-multiplier">Playing</span>
+                    </div>
+                </div>
+                <div class="player-item">
+                    <div class="player-name">
+                        <div class="player-avatar">J</div>
+                        <span>John_2023</span>
+                    </div>
+                    <div class="player-info">
+                        <span class="player-bet">150 ₿</span> • 
+                        <span class="player-multiplier crashed">Crashed</span>
+                    </div>
+                </div>
+                <div class="player-item">
+                    <div class="player-name">
+                        <div class="player-avatar">Y</div>
+                        <span>You</span>
+                    </div>
+                    <div class="player-info">
+                        <span class="player-bet">100 ₿</span> • 
+                        <span class="player-multiplier">Waiting...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 Aviator Game | Play responsibly | Minimum age 18+</p>
+        </footer>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            balance: 1000,
+            currentBet: 100,
+            isPlaying: false,
+            multiplier: 1.0,
+            cashOutMultiplier: 0,
+            airplanePosition: 0,
+            players: [
+                { name: "Alex", bet: 100, multiplier: 1.85, cashedOut: true },
+                { name: "Maria", bet: 200, multiplier: 1.23, cashedOut: true },
+                { name: "Telegram User", bet: 50, multiplier: 0, cashedOut: false },
+                { name: "John_2023", bet: 150, multiplier: 0, cashedOut: false, crashed: true },
+                { name: "You", bet: 100, multiplier: 0, cashedOut: false }
+            ]
+        };
+        
+        // DOM elements
+        const balanceElement = document.querySelector('.balance-amount');
+        const betInput = document.querySelector('.bet-input');
+        const multiplierDisplay = document.querySelector('.multiplier-display');
+        const airplane = document.querySelector('.airplane');
+        const cashOutButton = document.querySelector('.btn-danger');
+        const placeBetButton = document.querySelector('.btn-success');
+        
+        // Update UI based on game state
+        function updateUI() {
+            balanceElement.textContent = `${gameState.balance.toLocaleString()} ₿`;
+            betInput.value = gameState.currentBet;
+            
+            if (gameState.isPlaying) {
+                multiplierDisplay.textContent = gameState.multiplier.toFixed(2) + 'x';
+                airplane.style.bottom = `${gameState.airplanePosition}%`;
+            } else {
+                multiplierDisplay.textContent = '1.00x';
+                airplane.style.bottom = '0%';
+            }
+            
+            cashOutButton.disabled = !gameState.isPlaying;
+            placeBetButton.disabled = gameState.isPlaying;
+            
+            // Update players list
+            updatePlayersList();
+        }
+        
+        // Adjust bet amount
+        function adjustBet(factor) {
+            if (gameState.isPlaying) return;
+            
+            gameState.currentBet = Math.round(gameState.currentBet * factor);
+            if (gameState.currentBet > gameState.balance) {
+                gameState.currentBet = gameState.balance;
+            }
+            if (gameState.currentBet < 10) {
+                gameState.currentBet = 10;
+            }
+            
+            updateUI();
+        }
+        
+        // Place a bet
+        function placeBet() {
+            if (gameState.isPlaying) return;
+            if (gameState.currentBet > gameState.balance) {
+                alert('Not enough balance!');
+                return;
+            }
+            
+            gameState.isPlaying = true;
+            gameState.multiplier = 1.0;
+            gameState.cashOutMultiplier = 0;
+            gameState.airplanePosition = 0;
+            
+            // Update player state
+            gameState.players[4].bet = gameState.currentBet;
+            gameState.players[4].multiplier = 0;
+            gameState.players[4].cashedOut = false;
+            gameState.players[4].crashed = false;
+            
+            // Start the game animation
+            startGame();
+            
+            updateUI();
+        }
+        
+        // Cash out
+        function cashOut() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.isPlaying = false;
+            gameState.cashOutMultiplier = gameState.multiplier;
+            const winAmount = Math.round(gameState.currentBet * gameState.multiplier);
+            gameState.balance += winAmount;
+            
+            // Update player state
+            gameState.players[4].multiplier = gameState.multiplier;
+            gameState.players[4].cashedOut = true;
+            
+            // Flash effect for cash out
+            const playerElement = document.querySelectorAll('.player-item')[4];
+            playerElement.classList.add('cashed-out');
+            setTimeout(() => playerElement.classList.remove('cashed-out'), 500);
+            
+            updateUI();
+        }
+        
+        // Start the game animation
+        function startGame() {
+            let startTime = Date.now();
+            let duration = 5000 + Math.random() * 10000; // 5-15 seconds
+            
+            const gameLoop = setInterval(() => {
+                if (!gameState.isPlaying) {
+                    clearInterval(gameLoop);
+                    return;
+                }
+                
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Calculate multiplier (exponential growth)
+                gameState.multiplier = 1 + Math.exp(progress * 3) - 1;
+                
+                // Calculate airplane position
+                gameState.airplanePosition = progress * 100;
+                
+                // Random crash simulation
+                if (progress >= 1 || (progress > 0.5 && Math.random() < 0.005 * progress)) {
+                    // Game over - crash
+                    gameState.isPlaying = false;
+                    gameState.players[4].multiplier = 0;
+                    gameState.players[4].cashedOut = true;
+                    gameState.players[4].crashed = true;
+                    gameState.balance -= gameState.currentBet;
+                    clearInterval(gameLoop);
+                    
+                    // Show crash animation
+                    multiplierDisplay.style.color = '#ef5350';
+                    setTimeout(() => {
+                        multiplierDisplay.style.color = '#ffffff';
+                    }, 500);
+                }
+                
+                updateUI();
+            }, 50);
+        }
+        
+        // Update players list
+        function updatePlayersList() {
+            const playerItems = document.querySelectorAll('.player-item');
+            
+            gameState.players.forEach((player, index) => {
+                const betInfo = playerItems[index].querySelector('.player-info');
+                const multiplierElement = playerItems[index].querySelector('.player-multiplier');
+                
+                if (player.crashed) {
+                    betInfo.innerHTML = `<span class="player-bet">${player.bet} ₿</span> • <span class="player-multiplier crashed">Crashed</span>`;
+                } else if (player.cashedOut) {
+                    betInfo.innerHTML = `<span class="player-bet">${player.bet} ₿</span> • <span class="player-multiplier">${player.multiplier > 0 ? player.multiplier.toFixed(2) + 'x' : 'Cashed out'}</span>`;
+                } else {
+                    betInfo.innerHTML = `<span class="player-bet">${player.bet} ₿</span> • <span class="player-multiplier">Playing</span>`;
+                }
+            });
+        }
+        
+        // Initialize the UI
+        updateUI();
+        
+        // Simulate other players' actions for demo purposes
+        setInterval(() => {
+            if (Math.random() < 0.3 && !gameState.players[2].cashedOut) {
+                gameState.players[2].multiplier = (1 + Math.random() * 3).toFixed(2);
+                gameState.players[2].cashedOut = true;
+                
+                const playerElement = document.querySelectorAll('.player-item')[2];
+                playerElement.classList.add('cashed-out');
+                setTimeout(() => playerElement.classList.remove('cashed-out'), 500);
+                
+                updateUI();
+            }
+        }, 3000);
+        
+        // Input validation for bet amount
+        betInput.addEventListener('change', () => {
+            let value = parseInt(betInput.value);
+            if (isNaN(value) || value < 10) value = 10;
+            if (value > gameState.balance) value = gameState.balance;
+            gameState.currentBet = value;
+            updateUI();
+        });
+    </script>
+</body>
+</html>
